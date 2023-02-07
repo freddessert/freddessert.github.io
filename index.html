@@ -134,11 +134,11 @@ input[type="radio"] {
 </div>
 
 <div class="rightpane">
-    <img id="imageToLabel" width="100%" src="">
+    <video id="videoToLabel" width="100%" src="">
 </div>
 
 <script>
-  const elem = document.getElementById('imageToLabel');
+  const elem = document.getElementById('videoToLabel');
 
   const panzoom = Panzoom(elem, { canvas: true })
   const parent = elem.parentElement
@@ -258,7 +258,7 @@ input[type="radio"] {
         drawAsset(state.preloadedAsset)
         state.preloadedAsset = undefined
       } else {
-        document.getElementById('imageToLabel').src = ""
+        document.getElementById('videoToLabel').src = ""
       }
       panzoom.reset()
     }
@@ -303,7 +303,7 @@ input[type="radio"] {
     //document.getElementById("submit").disabled = true;
 
     if ((state.currentAsset && state.currentAsset.data) !== asset.data) {
-      document.getElementById('imageToLabel').src=asset.data;
+      document.getElementById('videoToLabel').src=asset.data;
     }
     if ((state.currentAsset && state.currentAsset.id) !== asset.id) {
       document.getElementById('assetExternalId').innerHTML=asset.externalId;
