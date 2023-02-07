@@ -112,6 +112,10 @@ input[type="radio"] {
 
 <script src="https://api.labelbox.com/static/labeling-api.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.21.1/video.min.js"></script>
+
+<script src="https://unpkg.com/browse/@videojs/http-streaming@2.6.0/dist/videojs-http-streaming.min.js"></script>
+
 </head>
 <body>
 
@@ -134,7 +138,7 @@ input[type="radio"] {
 </div>
 
 <div class="rightpane">
-    <video id="videoToLabel" width="100%" src="">
+    <video-js id="videoToLabel" width="100%" src="">
 </div>
 
 <script>
@@ -169,16 +173,22 @@ input[type="radio"] {
 
   function asyncLoadImage(url) {
     return new Promise((resolve) => {
-      const vid = document.createElement('video');
-      vid.src = url;
+      const vid = document.createElement('video-js');
+      vid.id = "vid1"
+      const source = document.createElement('source')
+      source.src = url;
+      source.type = "application/x-mpegURL";
       vid.onload = () => {
         vid.remove();
         resolve();
       };
       vid.style.display = 'none',
-      vid.style.width = '0px',
-      vid.style.height = '0px',
+      vid.style.width = '640px',
+      vid.style.height = '268px',
+      vid.appendChild(source)
       document.body.appendChild(vid);
+      var player = videojs('vid1');
+      player.play();
     });
   }
 
