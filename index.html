@@ -137,8 +137,7 @@ input[type="radio"] {
 
 <div class="rightpane">
     <video-js id="videoToLabel" class="vjs-default-skin" controls preload="auto" width="640" height="268">
-        <source src="https://b-a0e805c9.kinesisvideo.us-west-2.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiDu8x_P8NUN9n51ZiWQfe_MWQOllcLrvGkTH8nmf_0aPhIQBNyUOFDo-Sr58gOvDFHHCRoZHOojtuxN4dxQBzj95kshqOXMHxcuGhklRyIg2g83d_MqvSDnHrybBbN-4A6Y3fnspynG61ZUyZ9tgLs~" 
-    type="application/x-mpegURL">
+        <source id="videoSource" type="application/x-mpegURL">
     </video-js>
 
 
@@ -317,14 +316,14 @@ input[type="radio"] {
   }
 
   function drawAsset(asset) {
-    var player = videojs('videoToLabel');
-    player.play();
     document.getElementById("back").disabled = !Boolean(asset.previous);  
     document.getElementById("next").disabled = !Boolean(asset.next || asset.label);
     //document.getElementById("submit").disabled = true;
 
     if ((state.currentAsset && state.currentAsset.data) !== asset.data) {
-      document.getElementById('videoToLabel').src=asset.data;
+      document.getElementById('videoSource').src=asset.data;
+        var player = videojs('videoToLabel');
+        player.play();
     }
     if ((state.currentAsset && state.currentAsset.id) !== asset.id) {
       document.getElementById('assetExternalId').innerHTML=asset.externalId;
