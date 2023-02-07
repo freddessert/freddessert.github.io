@@ -110,37 +110,16 @@ input[type="radio"] {
 <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
 </head>
 <body>
-
-<!-- <div class="leftpane">
-  <div class="padded">
-   <div class="scrollable">
-    <a href="https://app.labelbox.com">&lt;- Back to labelbox</a>
-    
-    <p id="assetExternalId">Loading...</p>
-    
-    <div id="questionList"></div>
-   </div> 
-    
-    <div class="bottombuttons">
-        <div class="threebuttons"><button type="button" id="back" onclick="goBack()">Last Image</button><button type="button" id="skip" onclick="skip()">Skip Image</button><button type="button" id="next" onclick="goNext()">Next Image</button></div>
-        <button class="submitbutton" id="submit" type="button" onclick="submit()">Submit (e)</button>
-    </div>
-    
-  </div>
-</div> -->
-
-<!-- <div class="rightpane"> -->
-    <video-js id="videoToLabel" class="vjs-default-skin" controls preload="auto" width="640" height="268">
-        <source id="videoSource" 
-        src="https://b-a0e805c9.kinesisvideo.us-west-2.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiDu8x_P8NUN9n51ZiWQfe_MWQOllcLrvGkTH8nmf_0aPhIQBNyUOFDo-Sr58gOvDFHHCRoZHOojtuxN4dxQBzj95kshqOXMHxcuGhklRyIg2g83d_MqvSDnHrybBbN-4A6Y3fnspynG61ZUyZ9tgLs~" 
+<video-js id="videoToLabel" class="vjs-default-skin" controls preload="auto" width="640" height="268">
+    <source id="videoSource" 
+    src="https://b-a0e805c9.kinesisvideo.us-west-2.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiDu8x_P8NUN9n51ZiWQfe_MWQOllcLrvGkTH8nmf_0aPhIQBNyUOFDo-Sr58gOvDFHHCRoZHOojtuxN4dxQBzj95kshqOXMHxcuGhklRyIg2g83d_MqvSDnHrybBbN-4A6Y3fnspynG61ZUyZ9tgLs~" 
     type="application/x-mpegURL">
-    </video-js>
+</video-js>
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.21.1/video.min.js"></script>
-    
-    <script src="https://unpkg.com/browse/@videojs/http-streaming@2.6.0/dist/videojs-http-streaming.min.js"></script>
-<!-- </div> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.21.1/video.min.js"></script>
+
+<script src="https://unpkg.com/browse/@videojs/http-streaming@2.6.0/dist/videojs-http-streaming.min.js"></script>
 
 <script>
   let state = {
@@ -159,6 +138,8 @@ Labelbox.currentAsset().subscribe((asset) => {
 
   function drawAsset(asset) {
     console.log(asset)
+    var player = videojs('videoToLabel');
+    player.play();
     // document.getElementById('videoSource').src=asset.data;
     state = {
       ...state,
