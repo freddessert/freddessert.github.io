@@ -1,39 +1,355 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset=utf-8 />
-<title>videojs-contrib-hls embed</title>
-  
-  <!--
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
 
-  Uses the latest versions of video.js and videojs-http-streaming.
+.leftpane {
+  height: 100%;
+  width: 20%;
+  position: fixed;
+  z-index: 1;
+  bottom: 0;
+  overflow: hidden;
+  left: 0;
+  background-color: rgb(232, 243, 255);
+}
 
-  To use specific versions, please change the URLs to the form:
+.rightpane {
+  height: 100%;
+  width: 80%;
+  position: fixed;
+  z-index: 1;
+  bottom: 0;
+  overflow-x: hidden;
+  right: 0;
+}
 
-  <link href="https://unpkg.com/video.js@6.7.1/dist/video-js.css" rel="stylesheet">
-  <script src="https://unpkg.com/video.js@6.7.1/dist/video.js"></script>
-  <script src="https://unpkg.com/@videojs/http-streaming@0.9.0/dist/videojs-http-streaming.js"></script>
+.selectable {
+  border-top: 1px solid rgb(232, 243, 255);
+  display: block;
+  padding: 5px;
+}
 
-  -->
+.padded {
+  margin: 10px;
+  position:absolute;
+  bottom:0;
+  top:0;
+  left:0;
+  right:0;
+  flex-direction: column;
+  display: flex;
+}
 
-  <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+.scrollable {
+  flex: 1;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+}
+
+.selector {
+  background-color: white;
+}
+
+button {
+  background-color: #2876D4;
+  color: white;
+  padding: 8px;
+  border-radius: 4px;
+  border: none;
+  flex-basis: 100%;
+  font-size: 16px;
+  width:100%;
+  margin:3px;
+}
+
+.submitbutton {
+  display: block;
+  width: 100%;
+  margin:0px;
+}
+
+.buttonthird {
+  display: inline-block;
+  width: 33.33%;
+  padding: 2px;
+}
+
+.threebuttons {
+  display: flex;
+  width:100%;
+}
+
+[type="button"]:enabled {
+    opacity: 1;
+}
+
+[type="button"]:not(:enabled) {
+    opacity: 0.2;
+}
+
+label {
+  display: block;
+}
+
+input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+
+[type="radio"]:checked+* {
+    background-color: silver;
+}
+
+[type="radio"]:not(:checked)+* {
+    background-color: white;
+}
+
+</style>
+
+<script src="https://unpkg.com/@panzoom/panzoom@4.5.0/dist/panzoom.min.js"></script>
+
+<script src="https://api.labelbox.com/static/labeling-api.js"></script>
+
 </head>
 <body>
-  <h1>Video.js Example Embed</h1>
 
-  <video-js id="my_video_1" class="vjs-default-skin" controls preload="auto" width="640" height="268">
-    <source src="https://b-a0e805c9.kinesisvideo.us-west-2.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiACL9sIRNRE1-jT6TU4iInkMrtnujk4chYFPkneu0880BIQI0WzBeY1qsOYwi0otAmkIBoZONDYbZSqWUwspmRX-C6ubRZdEpC_W0K-aSIgQ4ZUcpBkp-7JGU2IxkirI7wIgSuilFevvTC3h9c8Nog~" 
+<div class="leftpane">
+  <div class="padded">
+   <div class="scrollable">
+    <a href="https://app.labelbox.com">&lt;- Back to labelbox</a>
+    
+    <p id="assetExternalId">Loading...</p>
+    
+    <div id="questionList"></div>
+   </div> 
+    
+    <div class="bottombuttons">
+        <div class="threebuttons"><button type="button" id="back" onclick="goBack()">Last Image</button><button type="button" id="skip" onclick="skip()">Skip Image</button><button type="button" id="next" onclick="goNext()">Next Image</button></div>
+        <button class="submitbutton" id="submit" type="button" onclick="submit()">Submit (e)</button>
+    </div>
+    
+  </div>
+</div>
+
+<div class="rightpane">
+    <video-js id="videoToLabel" class="vjs-default-skin" controls preload="auto" width="640" height="268">
+        <source src="https://b-a0e805c9.kinesisvideo.us-west-2.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiC0QkNkPTyPmolahhaL8WgDw7bMX_iEPXJ-a5pxYPt6tBIQE5_-sff3haeHh71nFsbYwRoZo8blJfGoi7ebqEal9JuaM2ACoIJPYO4CVSIgxxfrFDqp1s3piQY1eLw8NdELtsZrPRJ4GD5OnDCj_-A~" 
     type="application/x-mpegURL">
-  </video-js>
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.21.1/video.min.js"></script>
+    </video-js>
 
-<script src="https://unpkg.com/browse/@videojs/http-streaming@2.6.0/dist/videojs-http-streaming.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.21.1/video.min.js"></script>
+    
+    <script src="https://unpkg.com/browse/@videojs/http-streaming@2.6.0/dist/videojs-http-streaming.min.js"></script>
+</div>
+<script>
+  const elem = document.getElementById('videoToLabel');
+
+  const panzoom = Panzoom(elem, { canvas: true })
+  const parent = elem.parentElement
+  parent.addEventListener('wheel', panzoom.zoomWithWheel)
+  /*parent.addEventListener('wheel', function(event) {
+    if (!event.shiftKey) return
+    panzoom.zoomWithWheel(event)
+  })*/
+</script>
+
+<script>
+  let state = {
+    projectId: new URL(window.location.href).searchParams.get("project"),
+    currentAsset: undefined,
+    preloadedAsset: undefined,
+    ongoingSubmit: undefined,
+  };
+
+  function populateQuestion({ type, name, options, instructions }, answer) {
+    // optionList = options.map(({ value, label }) => {
+    //     cs = (answer || []).indexOf(value) !== -1 ? "checked" : "";
+    //     return `<label><input type="radio" id="${value}" name="${name}" onclick="selectionMade()" value="${value}" ${cs} ><span class="selectable">${label}</span></label>`;
+    // }).join("");
+    
+    // return `<h3>${instructions}</h3><div class="selector" id="${name}">` + optionList + `</div>`
+    return ``
+  }
+
+  function asyncLoadImage(url) {
+    return new Promise((resolve) => {
+        console.log("URL: ")
+        console.log(url)
+      const vid = document.createElement('video-js');
+      vid.id = "vid1"
+      const source = document.createElement('source')
+      source.src = url;
+      source.type = "application/x-mpegURL";
+      vid.onload = () => {
+        vid.remove();
+        resolve();
+      };
+      vid.style.display = 'none',
+      vid.style.width = '640px',
+      vid.style.height = '268px',
+      vid.appendChild(source)
+      document.body.appendChild(vid);
+      var player = videojs('vid1');
+      player.play();
+    });
+  }
+
+  function preloadFunction(asset) {
+    console.log(asset)
+    state.preloadedAsset = asset;
+    return asyncLoadImage(asset.data);
+  }
+
+  Labelbox.enablePreloading({preloadFunction})
+
+  function createQuestion(question, answers) {
+    const optionalAnswer = (answers || {})[question.name];
+    return populateQuestion(question, optionalAnswer);
+  }
+
+  let classifications = [];
+  let markQuestionsAsLoaded;
+  new Promise(resolve => {
+    markQuestionsAsLoaded = resolve;
+  }).then(() => {
+    Labelbox.currentAsset().subscribe(asset => {
+      if (asset) {
+        maybeDrawAsset(asset);
+      }
+    });
+  });
+
+  function drawQuestions(classifications, answers) {
+    document.getElementById('questionList').innerHTML = classifications
+      .map(classification => createQuestion(classification, answers))
+      .join("");
+  }
+
+  Labelbox.getTemplateCustomization().subscribe(customization => {
+    classifications = customization.classifications;
+    drawQuestions(classifications);
+    markQuestionsAsLoaded();
+  });
+
+  function skip() {
+    state.preloadedAsset = undefined;
+    Labelbox.skip().then(() => {
+      Labelbox.fetchNextAssetToLabel();
+    });
+  }
+
+  function getLabel() {
   
-  <script>
-    var player = videojs('my_video_1');
-    player.play();
-  </script>
+    answers = Array.from(document.getElementById('questionList').querySelectorAll("div"))
+        .map(node => {
+        const key = node.getAttribute("id");
+        const inputs = Array.from(node.querySelectorAll("input"));
+        const selected = inputs.find(child => child.checked);
+        return {
+          [key]: selected && selected.getAttribute("value")
+        };
+      });
+
+    return Object.assign({}, ...answers);
+  }
+
+  function submit() {
+    if (document.getElementById("submit").disabled || Boolean(state.ongoingSubmit))
+        return;
   
+    const label = JSON.stringify(getLabel());
+    const jumpToNext = Boolean(!state.currentAsset.label);
+    state.ongoingSubmit = state.currentAsset
+    Labelbox.setLabelForAsset(label).then(() => {
+      state.ongoingSubmit = undefined
+      if (jumpToNext) {
+        Labelbox.fetchNextAssetToLabel();
+      }
+    });
+    document.getElementById("submit").disabled = true
+    if (jumpToNext) {
+      if (state.preloadedAsset) {
+        drawAsset(state.preloadedAsset)
+        state.preloadedAsset = undefined
+      } else {
+        document.getElementById('videoToLabel').src = ""
+      }
+      panzoom.reset()
+    }
+  }
+
+  function goBack() {
+    if (document.getElementById("back").disabled)
+        return;
+    state.preloadedAsset = undefined;
+    if (state.currentAsset.previous) {
+      Labelbox.setLabelAsCurrentAsset(state.currentAsset.previous);
+    }
+  }
+
+  function goNext() {
+    if (document.getElementById("next").disabled)
+        return;
+    state.preloadedAsset = undefined;
+    if (state.currentAsset.next) {
+      Labelbox.setLabelAsCurrentAsset(state.currentAsset.next);
+    } else {
+      Labelbox.fetchNextAssetToLabel();
+    }
+  }
+
+  function maybeDrawAsset(asset) {
+      if ((state.ongoingSubmit && state.ongoingSubmit.id) == asset.id) {
+          console.log("Not redrawing asset during submit...")
+      } else {
+          drawAsset(asset)
+      }
+  }
+  
+  function selectionMade() {
+      document.getElementById("submit").disabled = false
+      return true
+  }
+
+  function drawAsset(asset) {
+    document.getElementById("back").disabled = !Boolean(asset.previous);  
+    document.getElementById("next").disabled = !Boolean(asset.next || asset.label);
+    //document.getElementById("submit").disabled = true;
+
+    if ((state.currentAsset && state.currentAsset.data) !== asset.data) {
+      document.getElementById('videoToLabel').src=asset.data;
+    }
+    if ((state.currentAsset && state.currentAsset.id) !== asset.id) {
+      document.getElementById('assetExternalId').innerHTML=asset.externalId;
+      if (asset.label) {
+        try {
+          const label = JSON.parse(asset.label);
+          drawQuestions(classifications, label);
+        } catch (e) {
+          console.log("failed to read label", e);
+        }
+      } else {
+        drawQuestions(classifications);
+      }
+    }
+    state = {
+      ...state,
+      currentAsset: asset
+    };
+  }
+  
+  function doc_keyUp(e) {
+    if (e.key === 'e') {
+        submit();
+    }
+  }
+  
+  document.addEventListener('keyup', doc_keyUp, false);
+  
+</script>
+
 </body>
-</html>
+</html> 
