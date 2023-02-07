@@ -158,12 +158,13 @@ input[type="radio"] {
   };
 
   function populateQuestion({ type, name, options, instructions }, answer) {
-    optionList = options.map(({ value, label }) => {
-        cs = (answer || []).indexOf(value) !== -1 ? "checked" : "";
-        return `<label><input type="radio" id="${value}" name="${name}" onclick="selectionMade()" value="${value}" ${cs} ><span class="selectable">${label}</span></label>`;
-    }).join("");
+    // optionList = options.map(({ value, label }) => {
+    //     cs = (answer || []).indexOf(value) !== -1 ? "checked" : "";
+    //     return `<label><input type="radio" id="${value}" name="${name}" onclick="selectionMade()" value="${value}" ${cs} ><span class="selectable">${label}</span></label>`;
+    // }).join("");
     
-    return `<h3>${instructions}</h3><div class="selector" id="${name}">` + optionList + `</div>`
+    // return `<h3>${instructions}</h3><div class="selector" id="${name}">` + optionList + `</div>`
+    return ``
   }
 
   function asyncLoadImage(url) {
